@@ -140,6 +140,29 @@ class Card {
     text(this.suitSymbol(), this.x-offset, this.y + 24);
   }
   
+  drawstacked(x, y, offset=0) {
+    this.x = x;
+    this.y = y;
+    
+    rectMode(CENTER);
+    fill(0);
+    rect(this.x + 2, this.y + 2, this.sizex, this.sizey, 10, 10, 10, 10);
+    fill(this.cardColor());
+    rect(this.x, this.y, this.sizex, this.sizey, 10, 10, 10, 10);
+    textSize(42);
+    fill(this.suitColor());
+    textAlign(CENTER, CENTER)
+    if (this.isJoker)
+      text("J", this.x-offset-44, this.y - 35);
+    else
+      text(this.valToStr(), this.x-offset-44, this.y - 35);
+    if (this.isJoker)
+      textSize(50);
+    else
+      textSize(64);
+    text(this.suitSymbol(), this.x-offset-44, this.y + 24);
+  }
+  
   
   // Returns a deck that is sorted from least value to most
   //

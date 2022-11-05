@@ -1,4 +1,5 @@
 var deckOfCards,
+  sound,
   cardsInPlay = [],
   discardIndexes = [],
   cardsDiscarded = [],
@@ -73,6 +74,8 @@ function setup() {
   // Set initial state for some vars
   nextCard = null;
   doubleCount = 0;
+  sound = new Sound();
+  sound.loop_bgm();
 }
 
 function draw() {
@@ -91,8 +94,14 @@ function draw() {
   if (cardsForDoubling.length > 0) {
     let length = cardsForDoubling.length;
     for (let i = 0; i < length; i++) {
-      if (i < length - 1)
-        cardsForDoubling[i].drawxy(CENTER_X - 90 * (length - i - 1) - 20, CARDSY - 40);
+      if (i < length - 1) {
+        // Cards on the left stack will have a different 
+        // position for suit and value placement
+        if (i == length - 2)
+          cardsForDoubling[i].drawxy(CENTER_X - 90 * (length - i - 1) - 25, CARDSY - 40);
+        else
+          cardsForDoubling[i].drawstacked(CENTER_X - 60 * (length - i - 1) - 60, CARDSY - 40);
+      }
       // draw off center if more than two cards
       else if (i == length - 1 && length > 1)
         cardsForDoubling[i].drawxy(CENTER_X + 100, CARDSY - 40);
@@ -298,6 +307,24 @@ function update() {
       default: mult = 0;
         break;
     }
+    // Play sounds based on final poker hand
+    switch(mult) {
+      case 100: 
+      case 50:
+      case 20:
+      case 10:
+        sound.play("greathand");
+        break;
+      case 5:
+      case 4:
+      case 3:
+      case 2:
+      case 1:
+        sound.play("goodhand");
+        break;
+      case 0: sound.play("badhand");
+        break;
+    }
     state = end;
     betAmount *= mult;
   }
@@ -470,6 +497,7 @@ function reset() {
   discardIndexes = [];
   state = discard;
   bInvalidBet = false;
+  doubleCount = 0;
   
   // Subtract bet from chips
   chips -= betAmount;
@@ -491,10 +519,15 @@ function reset() {
     cardsInPlay[i].x = 190 * (i + 1) + 70;
     cardsInPlay[i].y = CARDSY;
   }
-
+  
+  // Play card sound
+  sound.play("card");
 }
 
 function keyPressed() {
+  // Card sound is played for some reason if space is pressed
+  if (keyCode == 32 && state != discard)
+    return;
   switch (state) {
     case start:
       switch (keyCode) {
@@ -503,20 +536,29 @@ function keyPressed() {
             deal();
           break;
         case LEFT_ARROW:
-          if (betAmount > 10)
+          if (betAmount > 10) {
             betAmount -= 10;
-          else
+            sound.play("ding");
+          }
+          else {
+            if (betAmount != 1)
+              sound.play("ding");
             betAmount = 1;
+          }
           break;
         case RIGHT_ARROW:
           betAmount += 10;
+          sound.play("ding");
           break;
         case UP_ARROW:
           betAmount++;
+          sound.play("ding");
           break;
         case DOWN_ARROW:
-          if (betAmount > 1)
+          if (betAmount > 1) {
             betAmount--;
+            sound.play("ding");
+          }
           break;
       }
       break;
@@ -529,6 +571,7 @@ function keyPressed() {
     case end:
       if (keyCode == ENTER)
         state = doubling;
+        sound.play("card");
       break;
     case doubling:
       if (keyCode == ENTER)
@@ -538,6 +581,7 @@ function keyPressed() {
     case hlwin:
       if (keyCode == ENTER)
         state = highlow;
+        sound.play("card");
       break;
     case hllose:
       if (keyCode == ENTER)
@@ -552,6 +596,7 @@ function keyPressed() {
         chips = STARTING_CHIPS;
         cardsInPlay = [];
         state = start;
+        sound.play("card");
       }
       break;
   }
@@ -571,23 +616,35 @@ function mouseClicked() {
       if (mouseX <= 528 + 18 && mouseX >= 528 - 18)
         if (mouseY <= 286 + 18 && mouseY >= 286 - 18) {
           betAmount++;
+          sound.play("ding");
         }
       // Down Arrow
       if (mouseX <= 622 + 18 && mouseX >= 622 - 18)
         if (mouseY <= 286 + 18 && mouseY >= 286 - 18) {
-          if (betAmount > 1) betAmount--;
+          if (betAmount > 1) {
+            betAmount--;
+            sound.play("ding");
+          }
           else betAmount = 1;
         }
       // Left Arrow
       if (mouseX <= 528 + 18 && mouseX >= 528 - 18)
         if (mouseY <= 336 + 18 && mouseY >= 336 - 18) {
-          if (betAmount > 10) betAmount -= 10;
-          else betAmount = 1;
+          if (betAmount > 10) {
+            betAmount -= 10;
+            sound.play("ding");
+          }
+          else {
+            if (betAmount > 1)
+              sound.play("ding");
+            betAmount = 1;
+          }
         }
       // Right Arrow
       if (mouseX <= 622 + 18 && mouseX >= 622 - 18)
         if (mouseY <= 336 + 18 && mouseY >= 336 - 18) {
           betAmount+=10;
+          sound.play("ding");
         }
       // Deal Button
       if (mouseX <= 640 + 120 / 2 && mouseX >= 640 - 120 / 2)
@@ -615,6 +672,8 @@ function mouseClicked() {
           else if (index >= 0 && index <= 4) {
             discardIndexes.splice(index, 1);
           }
+          // Play select sound
+          sound.play("select");
         }
       }
       break;
@@ -623,6 +682,7 @@ function mouseClicked() {
       if (mouseX <= 640 + 80 / 2 && mouseX >= 640 - 80 / 2)
         if (mouseY <= 650 + 50 / 2 && mouseY >= 650 - 50 / 2) {
           state = doubling;
+          sound.play("card");
         }
       break;
     case doubling:
@@ -657,6 +717,7 @@ function mouseClicked() {
       if (mouseX <= 570 + 80 / 2 && mouseX >= 570 - 80 / 2)
         if (mouseY <= 650 + 50 / 2 && mouseY >= 650 - 50 / 2) {
           state = highlow;
+          sound.play("card");
         }
       // No button
       if (mouseX <= 690 + 80 / 2 && mouseX >= 690 - 80 / 2)
@@ -685,6 +746,7 @@ function mouseClicked() {
           chips = STARTING_CHIPS;
           cardsInPlay = [];
           state = start;
+          sound.play("card");
         }
       break;
   }
@@ -699,6 +761,8 @@ function tradeAll() {
     else if (index >= 0 && index <= 4)
       discardIndexes.splice(index, 1);
   }
+  // Play card sound
+  sound.play("select");
 }
 
 // Transition functions between states
@@ -729,9 +793,14 @@ function tradeCards() {
     }
   }
   state = eval;
+  // Play card sound
+  sound.play("card");
 }
 
 function backToStart() {
+  if (betAmount > 0)
+    sound.play("cashout");
+  sound.play("card");
   cardsForDoubling = [];
   cardsInPlay = [];
   chips += betAmount;
@@ -750,6 +819,8 @@ function beginDouble() {
       break;
     }
   }
+  // Play card sound
+  sound.play("card");
 }
 
 // Function to call when executing high low
@@ -760,6 +831,9 @@ function highLowCard() {
     if (cardsForDoubling.indexOf(nextCard) == -1)
       break;
   }
+  
+  // Play card sound
+  sound.play("card");
   
   // Check if card is lower or higher than previous
   var bCorrect;
@@ -798,19 +872,20 @@ function highLowCard() {
     // Increase number of times doubling is successful
     doubleCount += 1;
     // No more doubling if won 10x in a row
-    if (doubleCount == DOUBLE_LIMIT) {
-      doubleCount = 0;
+    if (doubleCount == DOUBLE_LIMIT) 
       state = hlmax;
-    }
     else
       state = hlwin;
+    // Play doublewin sound
+    sound.play("doublewin");
   }
   else {
     print("Lose!");
     // Reset betAmount and doubleCount
     betAmount = 0;
-    doubleCount = 0;
     state = hllose;
+    // Play doublefail sound
+    sound.play("doublefail");
   }
   cardsForDoubling.push(nextCard);
   
