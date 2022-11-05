@@ -26,6 +26,7 @@ const betMessage = "Betting\n🡅 or 🡇: +/- 1  \n🡄 or 🡆: +/- 10",
   hlmaxMessage = "Maximum Doubling Reached!\nReturning to start...",
   playAgainMessage = "Press 'enter' to play again",
   gameoverMessage = "You ran out of chips!\GAMEOVER",
+  streakMessage = "x Streak!",
   pokerHands1 = "Royal Flush       x100\nFive of a Kind    x50\nStraight Flush    x20\nFour of a Kind    x10\nFull House        x5",
   pokerHands2 = "Flush              x4\nStraight           x3\nThree of a Kind    x2\nTwo Pair           x1\nOne Pair           x0",
   dealButton = "Deal",
@@ -240,12 +241,16 @@ function draw() {
     textSize(40);
     textAlign(CENTER, CENTER);
     drawText(highLowMessage, CENTER_X, 250, color(0), color(255, 201, 14));
+    if (doubleCount > 1)
+      drawText(doubleCount+streakMessage, CENTER_X + 300, CARDSY-40, color(0), color(255, 201, 14)); 
   }
   else if (state == hlwin) {
     textSize(40);
     textAlign(CENTER, CENTER);
     drawText(hlwinMessage, CENTER_X, 250, color(0), color(255, 201, 14)); 
     drawText(continuePlayingMessage, CENTER_X, 300, color(0), color(255, 201, 14));
+    if (doubleCount > 1)
+      drawText(doubleCount+streakMessage, CENTER_X + 300, CARDSY-40, color(0), color(255, 201, 14)); 
   }
   else if (state == hllose) {
     textSize(40);
