@@ -338,11 +338,6 @@ function update() {
       betAmount = 1;
       state = start;
     }
-    // Initialize bgm
-    if (startBgm == false) {
-      sound.loop_bgm();
-      startBgm = true;
-    }
   }
 
   // Update animations
@@ -351,7 +346,11 @@ function update() {
 
   }
 
-  // Update chips
+  // Initialize bgm
+  if (startBgm == false) {
+    sound.loop_bgm();
+    startBgm = true;
+  }
 
 }
 
