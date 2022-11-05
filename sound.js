@@ -14,19 +14,19 @@ let bgm = "bgm",
 class Sound {
   constructor() {
     // Background Music
-    this.bgm = createAudio('data/tota_casino_bgm.ogg');
-    this.bgm.volume(.5);
+    this.bgm = createAudio('data/tota_casino_bgm.mp3');
+    this.bgm.volume(0.5);
     
     // Sound Effects
-    this.badhand = createAudio('data/badhand.ogg');
-    this.goodhand = createAudio('data/goodhand.ogg');
-    this.greathand = createAudio('data/greathand.ogg');
-    this.slct = createAudio('data/select.ogg');
-    this.card = createAudio('data/card.ogg');
-    this.ding = createAudio('data/ding.ogg');
-    this.cashout = createAudio('data/cashout.ogg');
-    this.doublefail = createAudio('data/doublefail.ogg');
-    this.doublewin = createAudio('data/doublewin.ogg');
+    this.badhand = createAudio('data/badhand.mp3');
+    this.goodhand = createAudio('data/goodhand.mp3');
+    this.greathand = createAudio('data/greathand.mp3');
+    this.slct = createAudio('data/select.mp3');
+    this.card = createAudio('data/card.mp3');
+    this.ding = createAudio('data/ding.mp3');
+    this.cashout = createAudio('data/cashout.mp3');
+    this.doublefail = createAudio('data/doublefail.mp3');
+    this.doublewin = createAudio('data/doublewin.mp3');
   }
   
   play(sound) {

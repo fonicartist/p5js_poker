@@ -56,6 +56,11 @@ const CARDSY = 480,
   STARTING_CHIPS = 500,
   DOUBLE_LIMIT = 10;
 
+// Pre load media files
+function preload() {
+  sound = new Sound();
+}
+
 // Set up the environment
 function setup() {
   createCanvas(WIDTH, HEIGHT);
@@ -74,7 +79,6 @@ function setup() {
   // Set initial state for some vars
   nextCard = null;
   doubleCount = 0;
-  sound = new Sound();
   sound.loop_bgm();
 }
 
