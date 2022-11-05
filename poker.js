@@ -13,7 +13,8 @@ var betAmount,
   mult,
   highOrLow,
   doubleCount,
-  nextCard;
+  nextCard,
+  startBgm;
 let result = "";
 const betMessage = "Betting\n🡅 or 🡇: +/- 1  \n🡄 or 🡆: +/- 10",
   invalidBetMessage = "Bet amount must be less\n than or equal to Chips!",
@@ -79,7 +80,7 @@ function setup() {
   // Set initial state for some vars
   nextCard = null;
   doubleCount = 0;
-  sound.loop_bgm();
+  startBGM = false;
 }
 
 function draw() {
@@ -337,6 +338,11 @@ function update() {
       betAmount = 1;
       state = start;
     }
+    // Initialize bgm
+    if (startBgm == false) {
+      sound.loop_bgm();
+      startBgm = true;
+    }
   }
 
   // Update animations
@@ -351,7 +357,6 @@ function update() {
 
 // Returns the result as a string
 function checkHand(cardArray) {
-  sound.loop_bgm();
   var hand = [];
   var count = new Array(14);
   var flush = true;
