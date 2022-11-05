@@ -1,8 +1,13 @@
+body {
+  max-width: max-content;
+  margin: auto;
+}
 html, body {
-  margin: 0;
-  padding: 0;
+  margin: auto;
   background-color: #1c1c1c;
 }
 canvas {
-  display: block;
+  display: table-cell;
+  margin: auto;
+  border: 3px solid black;
 }

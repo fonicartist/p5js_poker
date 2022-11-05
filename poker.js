@@ -22,7 +22,8 @@ const betMessage = "Betting\n🡅 or 🡇: +/- 1  \n🡄 or 🡆: +/- 10",
   continuePlayingMessage = "Go again?",
   highLowMessage = "Will the next card be higher or lower?",
   hlwinMessage = "Alright! Winnings Doubled!",
-  hlloseMessage = "Sorry! You lost everything!"
+  hlloseMessage = "Sorry! You lost everything!",
+  hlmaxMessage = "Maximum Doubling Reached!\nReturning to start...",
   playAgainMessage = "Press 'enter' to play again",
   gameoverMessage = "You ran out of chips!\GAMEOVER",
   pokerHands1 = "Royal Flush       x100\nFive of a Kind    x50\nStraight Flush    x20\nFour of a Kind    x10\nFull House        x5",
@@ -43,6 +44,7 @@ const betMessage = "Betting\n🡅 or 🡇: +/- 1  \n🡄 or 🡆: +/- 10",
   highlow = "highlow",
   hlwin = "hlwin",
   hllose = "hllose",
+  hlmax = "hlmax",
   gameover = "gameover";
 const CARDSY = 480,
   WIDTH = 1280,
@@ -81,7 +83,7 @@ function draw() {
 
   // Draw cards
   // These are the cards in hand
-  if (![start, highlow, hlwin, hllose].includes(state))
+  if (![start, highlow, hlwin, hllose, hlmax].includes(state))
     for (let i = 0; i < cardsInPlay.length; i++)
       cardsInPlay[i].draw();
   // These are the cards for doubling
@@ -180,6 +182,16 @@ function draw() {
       textSize(36);
       drawText(okButton, 640, 650, color(0), color(255));
       break;
+    case hlmax:
+      drawButton(640, 648, 80, 50, color(0, 0, 0, 150), color(70, 50, 250));
+      textSize(36);
+      drawText(okButton, 640, 650, color(0), color(255));
+      break;
+    case gameover:
+      drawButton(640, 648, 80, 50, color(0, 0, 0, 150), color(70, 50, 250));
+      textSize(36);
+      drawText(okButton, 640, 650, color(0), color(255));
+      break;
   }
   strokeWeight(1);
 
@@ -239,6 +251,16 @@ function draw() {
     textSize(40);
     textAlign(CENTER, CENTER);
     drawText(hlloseMessage, CENTER_X, 250, color(0), color(255, 201, 14));
+  }
+  else if (state == hlmax) {
+    textSize(40);
+    textAlign(CENTER, CENTER);
+    drawText(hlmaxMessage, CENTER_X, 250, color(0), color(255, 201, 14));
+  }
+  else if (state == gameover) {
+    textSize(40);
+    textAlign(CENTER, CENTER);
+    drawText(gameoverMessage, CENTER_X, 250, color(0), color(255, 201, 14));
   }
   
 }
@@ -508,7 +530,15 @@ function keyPressed() {
         state = highlow;
         beginDouble();
       break;
-    case highlow:
+    case hlwin:
+      if (keyCode == ENTER)
+        state = highlow;
+      break;
+    case hllose:
+      if (keyCode == ENTER)
+        backToStart();
+      break;
+    case hlmax:
       if (keyCode == ENTER)
         backToStart();
       break;
@@ -636,6 +666,22 @@ function mouseClicked() {
           backToStart();
         }
       break;
+    case hlmax: 
+      // Ok button
+      if (mouseX <= 640 + 80 / 2 && mouseX >= 640 - 80 / 2)
+        if (mouseY <= 650 + 50 / 2 && mouseY >= 650 - 50 / 2) {
+          backToStart();
+        }
+      break;
+    case gamover: 
+      // Ok button
+      if (mouseX <= 640 + 80 / 2 && mouseX >= 640 - 80 / 2)
+        if (mouseY <= 650 + 50 / 2 && mouseY >= 650 - 50 / 2) {
+          chips = STARTING_CHIPS;
+          cardsInPlay = [];
+          state = start;
+        }
+      break;
   }
 }
 
@@ -747,11 +793,12 @@ function highLowCard() {
     // Increase number of times doubling is successful
     doubleCount += 1;
     // No more doubling if won 10x in a row
-    if (doubleCount == 10) {
+    if (doubleCount == DOUBLE_LIMIT) {
       doubleCount = 0;
-      backToStart();
+      state = hlmax;
     }
-    state = hlwin;
+    else
+      state = hlwin;
   }
   else {
     print("Lose!");
