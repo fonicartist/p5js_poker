@@ -1,13 +1,15 @@
-body {
-  max-width: max-content;
-  margin: auto;
-}
 html, body {
-  margin: auto;
-  background-color: #1c1c1c;
+    height: 100%;
+    background-color: #1c1c1c;
 }
-canvas {
-  display: table-cell;
-  margin: auto;
-  border: 3px solid black;
+
+html {
+    display: table;
+    margin: auto;
 }
+
+body {
+    display: table-cell;
+    vertical-align: middle;
+}
+
