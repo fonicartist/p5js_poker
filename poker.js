@@ -351,6 +351,7 @@ function update() {
 
 // Returns the result as a string
 function checkHand(cardArray) {
+  sound.loop_bgm();
   var hand = [];
   var count = new Array(14);
   var flush = true;
