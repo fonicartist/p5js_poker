@@ -637,7 +637,18 @@ function keyPressed() {
   return false;
 }
 
+function touchStarted() {
+  if (mouseIsPressed)
+    return false;
+  else
+    buttonClick();
+}
+
 function mouseClicked() {
+  buttonClick();
+}
+
+function buttonClick() {
   switch (state) {
     case start:
       /*
