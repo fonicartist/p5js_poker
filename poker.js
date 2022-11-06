@@ -14,8 +14,10 @@ var betAmount,
   highOrLow,
   doubleCount,
   nextCard,
-  startBgm;
-let result = "";
+  startBgm,
+  savedChips,
+  result,
+  pastBet;
 const betMessage = "Betting\n🡅 or 🡇: +/- 1  \n🡄 or 🡆: +/- 10",
   invalidBetMessage = "Bet amount must be less\n than or equal to Chips!",
   discardMessage = "Select cards you wish to trade",
@@ -27,7 +29,7 @@ const betMessage = "Betting\n🡅 or 🡇: +/- 1  \n🡄 or 🡆: +/- 10",
   hlloseMessage = "Sorry! You lost everything!",
   hlmaxMessage = "Maximum Doubling Reached!\nReturning to start...",
   playAgainMessage = "Press 'enter' to play again",
-  gameoverMessage = "You ran out of chips!\GAMEOVER",
+  gameoverMessage = "You ran out of chips!\nGAMEOVER",
   streakMessage = "x Streak!",
   pokerHands1 = "Royal Flush       x100\nFive of a Kind    x50\nStraight Flush    x20\nFour of a Kind    x10\nFull House        x5",
   pokerHands2 = "Flush              x4\nStraight           x3\nThree of a Kind    x2\nTwo Pair           x1\nOne Pair           x0",
@@ -54,11 +56,12 @@ const CARDSY = 480,
   HEIGHT = 720,
   CENTER_X = 640,
   CENTER_Y = 360,
-  STARTING_CHIPS = 500,
+  STARTING_CHIPS = 100,
   DOUBLE_LIMIT = 10;
 
 // Pre load media files
 function preload() {
+  print('preload');
   sound = new Sound();
 }
 
@@ -73,7 +76,11 @@ function setup() {
   state = start;
 
   // Starting number of chips
-  chips = STARTING_CHIPS;
+  savedChips = getItem('chips');
+  if (savedChips != null)
+    chips = savedChips;
+  else
+    chips = STARTING_CHIPS;
   betAmount = 1;
   bInvalidBet = false;
   
@@ -81,6 +88,8 @@ function setup() {
   nextCard = null;
   doubleCount = 0;
   startBgm = false;
+  result = "";
+  pastBet = -1;
 }
 
 function draw() {
@@ -285,7 +294,12 @@ function draw() {
 }
 
 function update() {
-  if (chips <= 0)
+  if (state == start && savedChips != chips && chips > 0) {
+    savedChips = chips;
+    storeItem('chips', savedChips);
+  }
+  
+  if (chips <= 0 && betAmount == 0)
     state = gameover;
 
   if (state == eval) {
@@ -335,26 +349,20 @@ function update() {
   }
   else if (state == doubling) {
     if (result == "Nothing" || result == "One Pair") {
-      betAmount = 1;
+      if (pastBet <= chips)
+        betAmount = pastBet;
+      else
+        betAmount = 1;
       state = start;
     }
   }
-
-  // Update animations
-  switch (state) {
-
-
-  }
-
-  // Update chips
 
 }
 
 // Returns the result as a string
 function checkHand(cardArray) {
-  sound.loop_bgm();
   var hand = [];
-  var count = new Array(14);
+  var count = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
   var flush = true;
   var onePair = false;
   var twoPair = false;
@@ -365,8 +373,8 @@ function checkHand(cardArray) {
   var numOfJokers = 0;
 
   // Initialize count array to all zeroes
-  for (let i = 0; i < count.length; i++)
-    count[i] = 0;
+  //for (let i = 0; i < count.length; i++)
+  //  count[i] = 0;
 
   // Copy array to new variable
   arrayCopy(cardArray, hand, 5);
@@ -497,22 +505,32 @@ function checkHand(cardArray) {
 }
 
 function reset() {
+  //print('reset');
   cardsInPlay = [];
-  cardsDiscard = [];
+  cardsDiscarded = [];
   cardsForDoubling = [];
   discardIndexes = [];
   state = discard;
   bInvalidBet = false;
   doubleCount = 0;
   
+  //print('passed variable reset');
+  
   if (!startBgm) {
+    print('starting bgm');
     startBgm = true;
     sound.loop_bgm();
   }
     
+  if (pastBet != betAmount) {
+    print('past bet = ' + pastBet);
+    pastBet = betAmount;
+  }
   
   // Subtract bet from chips
   chips -= betAmount;
+  
+  //print('chips subtracted');
 
   // Populate the card list
   for (let i = 0; i < 5; i++) {
@@ -525,12 +543,16 @@ function reset() {
       }
     }
   }
+  
+  //print('cards list populated');
 
   // Position the cards
   for (let i = 0; i < cardsInPlay.length; i++) {
     cardsInPlay[i].x = 190 * (i + 1) + 70;
     cardsInPlay[i].y = CARDSY;
   }
+  
+  //print('cards positioned');
   
   // Play card sound
   sound.play("card");
@@ -751,7 +773,7 @@ function mouseClicked() {
           backToStart();
         }
       break;
-    case gamover: 
+    case gameover: 
       // Ok button
       if (mouseX <= 640 + 80 / 2 && mouseX >= 640 - 80 / 2)
         if (mouseY <= 650 + 50 / 2 && mouseY >= 650 - 50 / 2) {
@@ -786,6 +808,7 @@ function deal() {
 }
 
 function tradeCards() {
+  print('tradeCards');
   for (let i = 0; i < discardIndexes.length; i++) {
     let index = discardIndexes[i];
     // Push discarded cards into discard pile
@@ -798,6 +821,7 @@ function tradeCards() {
         // Position the card
         card.y = CARDSY;
         card.x = cardsInPlay[index].x
+        card.isClicked = false;
         // Replace the discarded card
         cardsInPlay[index] = card;
         break;
@@ -816,12 +840,16 @@ function backToStart() {
   cardsForDoubling = [];
   cardsInPlay = [];
   chips += betAmount;
-  betAmount = 1;
+  if (pastBet <= chips)
+    betAmount = pastBet;
+  else
+    betAmount = 1;
   state = start;
 }
 
 // Function to call when entering doubling state
 function beginDouble() {
+  print('beginDouble');
   // Draw a random card to add to initialize doubling mechanic
   while (true) {
     let card = random(deckOfCards);
@@ -878,7 +906,6 @@ function highLowCard() {
   
   // bCorrect now holds whether the player is right
   if (bCorrect) {
-    print("Win!");
     // Double earnings
     betAmount *= 2;
     // Increase number of times doubling is successful
@@ -892,7 +919,6 @@ function highLowCard() {
     sound.play("doublewin");
   }
   else {
-    print("Lose!");
     // Reset betAmount and doubleCount
     betAmount = 0;
     state = hllose;

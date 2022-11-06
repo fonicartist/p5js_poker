@@ -32,6 +32,7 @@ class Sound {
   play(sound) {
     switch(sound) {
       case badhand: 
+        this.badhand.stop();
         this.badhand.play();
         break;
       case goodhand: 
