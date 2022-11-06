@@ -80,7 +80,7 @@ function setup() {
   // Set initial state for some vars
   nextCard = null;
   doubleCount = 0;
-  startBGM = false;
+  startBgm = false;
 }
 
 function draw() {
@@ -346,16 +346,13 @@ function update() {
 
   }
 
-  // Initialize bgm
-  if (startBgm == false) {
-    sound.loop_bgm();
-    startBgm = true;
-  }
+  // Update chips
 
 }
 
 // Returns the result as a string
 function checkHand(cardArray) {
+  sound.loop_bgm();
   var hand = [];
   var count = new Array(14);
   var flush = true;
@@ -507,6 +504,12 @@ function reset() {
   state = discard;
   bInvalidBet = false;
   doubleCount = 0;
+  
+  if (!startBgm) {
+    startBgm = true;
+    sound.loop_bgm();
+  }
+    
   
   // Subtract bet from chips
   chips -= betAmount;
