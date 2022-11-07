@@ -15,6 +15,7 @@ var betAmount,
   doubleCount,
   nextCard,
   startBgm,
+  muteBgm,
   savedChips,
   result,
   pastBet;
@@ -41,6 +42,8 @@ const betMessage = "Betting\n🡅 or 🡇: +/- 1  \n🡄 or 🡆: +/- 10",
   lowButton = "Low",
   yesButton = "YES",
   noButton = "NO",
+  musicButton = "♪",
+  welcome = "welcome",
   start = "start",
   discard = "discard",
   doubling = "doubling",
@@ -59,12 +62,14 @@ const CARDSY = 480,
   STARTING_CHIPS = 100,
   DOUBLE_LIMIT = 10;
 
+//=============================================================
 // Pre load media files
 function preload() {
   print('preload');
   sound = new Sound();
 }
 
+//=============================================================
 // Set up the environment
 function setup() {
   createCanvas(WIDTH, HEIGHT);
@@ -88,10 +93,13 @@ function setup() {
   nextCard = null;
   doubleCount = 0;
   startBgm = false;
+  muteBgm = false;
   result = "";
   pastBet = -1;
 }
 
+//=============================================================
+// Handles drawing items. Called 60x/seconds
 function draw() {
   // Update environment and variables
   update();
@@ -101,6 +109,7 @@ function draw() {
 
   // Draw cards
   // These are the cards in hand
+  strokeWeight(1);
   if (![start, highlow, hlwin, hllose, hlmax].includes(state))
     for (let i = 0; i < cardsInPlay.length; i++)
       cardsInPlay[i].draw();
@@ -291,8 +300,26 @@ function draw() {
     drawText(gameoverMessage, CENTER_X, 250, color(0), color(255, 201, 14));
   }
   
+  // Mute/Unmute button for BGM
+  strokeWeight(0);
+  if (muteBgm) {
+    let color1 = color(20, 140, 50, 50);
+    let color2 = color(247, 240, 196, 150);
+    drawCircleButton(1250, 690, 40, 35, color1, color2, '♪', 30);
+    fill(color(255, 0, 0, 200));
+    textSize(49);
+    text('⊘', 1250, 690);
+  }
+  else {
+    let color1 = color(20, 140, 50, 200);
+    let color2 = color(247, 240, 196, 250);
+    drawCircleButton(1250, 690, 40, 35, color1, color2, '♪', 30);
+  }
+  
 }
 
+//=============================================================
+// Updates variables based on state and environment
 function update() {
   if (state == start && savedChips != chips && chips > 0) {
     savedChips = chips;
@@ -359,7 +386,9 @@ function update() {
 
 }
 
-// Returns the result as a string
+//=============================================================
+// Evaluates poker hand and returns 
+// result as a string
 function checkHand(cardArray) {
   var hand = [];
   var count = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -504,6 +533,8 @@ function checkHand(cardArray) {
     return "Nothing";
 }
 
+//=============================================================
+// Start new round and reset environment
 function reset() {
   //print('reset');
   cardsInPlay = [];
@@ -513,8 +544,6 @@ function reset() {
   state = discard;
   bInvalidBet = false;
   doubleCount = 0;
-  
-  //print('passed variable reset');
   
   if (!startBgm) {
     print('starting bgm');
@@ -530,8 +559,6 @@ function reset() {
   // Subtract bet from chips
   chips -= betAmount;
   
-  //print('chips subtracted');
-
   // Populate the card list
   for (let i = 0; i < 5; i++) {
     while (true) {
@@ -543,8 +570,6 @@ function reset() {
       }
     }
   }
-  
-  //print('cards list populated');
 
   // Position the cards
   for (let i = 0; i < cardsInPlay.length; i++) {
@@ -552,16 +577,30 @@ function reset() {
     cardsInPlay[i].y = CARDSY;
   }
   
-  //print('cards positioned');
-  
   // Play card sound
   sound.play("card");
 }
 
+//=============================================================
+// Does actions based on what keys are 
+// pressed and the current state
 function keyPressed() {
   // Card sound is played for some reason if space is pressed
   if (keyCode == 32 && state != discard)
     return;
+  // Mute/Unmute BGM
+  if (keyCode == 77) {
+    if (muteBgm) {
+      // Unmute
+      muteBgm = false;
+      sound.loop_bgm();
+    }
+    else {
+      // Mute
+      muteBgm = true;
+      sound.stop_bgm();
+    }
+  }
   switch (state) {
     case start:
       switch (keyCode) {
@@ -648,7 +687,23 @@ function mouseClicked() {
   buttonClick();
 }
 
+//=============================================================
+// Register clicks based on mouse position and state
 function buttonClick() {
+  // Mute/Unmute BGM
+  if (mouseX <= 1250 + 25 && mouseX >= 1250 - 25)
+    if (mouseY <= 690 + 25 && mouseY >= 690 - 25) {
+      if (muteBgm) {
+        // Unmute
+        muteBgm = false;
+        sound.loop_bgm();
+      }
+      else {
+        // Mute
+        muteBgm = true;
+        sound.stop_bgm();
+      }
+    }
   switch (state) {
     case start:
       /*
@@ -797,6 +852,8 @@ function buttonClick() {
   }
 }
 
+//=============================================================
+// Swap trade position of all cards
 function tradeAll() {
   for (let i = 0; i < cardsInPlay.length; i++) {
     cardsInPlay[i].isClicked = !cardsInPlay[i].isClicked;
@@ -810,7 +867,8 @@ function tradeAll() {
   sound.play("select");
 }
 
-// Transition functions between states
+//=============================================================
+// Checks if a valid bet was made before changing states
 function deal() {
   if (betAmount <= chips)
     reset();
@@ -818,6 +876,8 @@ function deal() {
     bInvalidBet = true;
 }
 
+//=============================================================
+// Swap cards chosen for trading
 function tradeCards() {
   print('tradeCards');
   for (let i = 0; i < discardIndexes.length; i++) {
@@ -844,6 +904,8 @@ function tradeCards() {
   sound.play("card");
 }
 
+//=============================================================
+// Cashout winnings and return to start state
 function backToStart() {
   if (betAmount > 0)
     sound.play("cashout");
@@ -858,6 +920,7 @@ function backToStart() {
   state = start;
 }
 
+//=============================================================
 // Function to call when entering doubling state
 function beginDouble() {
   print('beginDouble');
@@ -874,6 +937,7 @@ function beginDouble() {
   sound.play("card");
 }
 
+//=============================================================
 // Function to call when executing high low
 function highLowCard() {
   // Grab a random card not in doubling list
@@ -940,6 +1004,7 @@ function highLowCard() {
   
 }
 
+//=============================================================
 // Functions to facilitate drawing boxes and text
 function drawBox(x, y, w, h, color1, color2) {
   fill(color1);
@@ -960,4 +1025,20 @@ function drawText(str, x, y, color1, color2) {
   text(str, x, y);
   fill(color2);
   text(str, x - 2, y - 2);
+}
+
+function drawCircleButton(x, y, r1, r2, color1, color2, str="", strSize=0) {
+  strokeWeight(0);
+  
+  // Circle
+  fill(color2);
+  circle(x, y, r1);
+  fill(color1);
+  circle(x, y, r2);
+
+  // Text
+  textAlign(CENTER, CENTER);
+  fill(color2);
+  textSize(strSize);
+  text(str, x, y);
 }

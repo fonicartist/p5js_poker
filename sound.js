@@ -71,7 +71,6 @@ class Sound {
   
   loop_bgm() {
     this.bgm.loop();
-    print("loop bgm was called");
   }
   
   stop_bgm() {
