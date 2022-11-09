@@ -65,7 +65,6 @@ const CARDSY = 480,
 //=============================================================
 // Pre load media files
 function preload() {
-  print('preload');
   sound = new Sound();
 }
 
@@ -536,7 +535,6 @@ function checkHand(cardArray) {
 //=============================================================
 // Start new round and reset environment
 function reset() {
-  //print('reset');
   cardsInPlay = [];
   cardsDiscarded = [];
   cardsForDoubling = [];
@@ -545,16 +543,13 @@ function reset() {
   bInvalidBet = false;
   doubleCount = 0;
   
-  if (!startBgm) {
-    print('starting bgm');
+  if (!startBgm && !muteBgm) {
     startBgm = true;
     sound.loop_bgm();
   }
     
-  if (pastBet != betAmount) {
-    print('past bet = ' + pastBet);
+  if (pastBet != betAmount)
     pastBet = betAmount;
-  }
   
   // Subtract bet from chips
   chips -= betAmount;
@@ -585,9 +580,6 @@ function reset() {
 // Does actions based on what keys are 
 // pressed and the current state
 function keyPressed() {
-  // Card sound is played for some reason if space is pressed
-  if (keyCode == 32 && state != discard)
-    return;
   // Mute/Unmute BGM
   if (keyCode == 77) {
     if (muteBgm) {
@@ -636,25 +628,57 @@ function keyPressed() {
       }
       break;
     case discard:
-      if (keyCode == 32)
-        tradeAll();
-      else if (keyCode == ENTER)
-        tradeCards();
+      // Control cards using keyboard during discard state
+      switch(keyCode) {
+        case 32: tradeAll();
+          break;
+        case ENTER: tradeCards();
+          break;
+        case 49: 
+        case 50: 
+        case 51: 
+        case 52: 
+        case 53: 
+          let i = keyCode - 49;
+          cardsInPlay[i].isClicked = !cardsInPlay[i].isClicked;
+          let index = discardIndexes.indexOf(i);
+          if (index == -1)
+            discardIndexes.push(i);
+          else if (index >= 0 && index <= 4) {
+            discardIndexes.splice(index, 1);
+          }
+          // Play select sound
+          sound.play("select");
+          break;
+      }
       break;
     case end:
-      if (keyCode == ENTER)
+      if (keyCode == ENTER) {
         state = doubling;
         sound.play("card");
+      }
       break;
     case doubling:
-      if (keyCode == ENTER)
+      if (keyCode == ENTER) {
         state = highlow;
         beginDouble();
+      } else if (keyCode == BACKSPACE)
+        backToStart();
+      break;
+    case highlow:
+      if (keyCode == 49) {
+        highOrLow = highButton;
+        highLowCard();
+      } else if (keyCode == 50) {
+        highOrLow = lowButton;
+        highLowCard();
+      }
       break;
     case hlwin:
-      if (keyCode == ENTER)
+      if (keyCode == ENTER) {
         state = highlow;
         sound.play("card");
+      }
       break;
     case hllose:
       if (keyCode == ENTER)
@@ -674,13 +698,6 @@ function keyPressed() {
       break;
   }
   return false;
-}
-
-function touchStarted() {
-  if (mouseIsPressed)
-    return false;
-  else
-    buttonClick();
 }
 
 function mouseClicked() {
@@ -879,7 +896,6 @@ function deal() {
 //=============================================================
 // Swap cards chosen for trading
 function tradeCards() {
-  print('tradeCards');
   for (let i = 0; i < discardIndexes.length; i++) {
     let index = discardIndexes[i];
     // Push discarded cards into discard pile
@@ -923,7 +939,6 @@ function backToStart() {
 //=============================================================
 // Function to call when entering doubling state
 function beginDouble() {
-  print('beginDouble');
   // Draw a random card to add to initialize doubling mechanic
   while (true) {
     let card = random(deckOfCards);
