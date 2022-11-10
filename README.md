@@ -13,3 +13,4 @@ Click on screen buttons
 - Spacebar: Trade-All (Swap trade positions for all cards)
 - Number Bar 1-5: Cards 1-5 (Card trading)
 - Number Bar 1-2: High-Low (When guessing on high or low card) 
+- M: Mute/Unmute music
