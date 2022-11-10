@@ -2,8 +2,11 @@
 Hosting poker game made in Javascript and p5js library
 - Based on the poker mini game from the Keterburg Casino in Tales of the Abyss
 
+## Play
+Deployed at: https://fonicartist.github.io/p5js_poker/
+
 ## Control Scheme
-- Click on screen buttons
+Click on screen buttons
 ### Keyboard Ctrl
 - Enter: Ok and Yes buttons
 - Backspace: No buttons
