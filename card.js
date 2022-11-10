@@ -100,7 +100,7 @@ class Card {
   
   draw() {
     if (this.isClicked)
-      this.yOffset = -30;
+      this.yOffset = -35;
     else
       this.yOffset = 0;
     

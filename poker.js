@@ -1,66 +1,95 @@
+// Game objects and arrays
 var deckOfCards,
-  sound,
-  cardsInPlay = [],
-  discardIndexes = [],
-  cardsDiscarded = [],
-  cardsForDoubling = [],
-  cardToAnimate = [];
+    sound,
+    cardsInPlay = [],
+    discardIndexes = [],
+    cardsDiscarded = [],
+    cardsForDoubling = [],
+    cardToAnimate = [];
+
+// Global variables
 var betAmount,
-  bInvalidBet,
-  chips,
-  cardsAnim,
-  state,
-  mult,
-  highOrLow,
-  doubleCount,
-  nextCard,
-  startBgm,
-  muteBgm,
-  savedChips,
-  result,
-  pastBet;
-const betMessage = "Betting\n🡅 or 🡇: +/- 1  \n🡄 or 🡆: +/- 10",
-  invalidBetMessage = "Bet amount must be less\n than or equal to Chips!",
-  discardMessage = "Select cards you wish to trade",
-  dealMessage = "Click 'Deal' to deal a new hand",
-  doubleMessage = "Play Higher/Lower to multiply winnings?",
-  continuePlayingMessage = "Go again?",
-  highLowMessage = "Will the next card be higher or lower?",
-  hlwinMessage = "Alright! Winnings Doubled!",
-  hlloseMessage = "Sorry! You lost everything!",
-  hlmaxMessage = "Maximum Doubling Reached!\nReturning to start...",
-  playAgainMessage = "Press 'enter' to play again",
-  gameoverMessage = "You ran out of chips!\nGAMEOVER",
-  streakMessage = "x Streak!",
-  pokerHands1 = "Royal Flush       x100\nFive of a Kind    x50\nStraight Flush    x20\nFour of a Kind    x10\nFull House        x5",
-  pokerHands2 = "Flush              x4\nStraight           x3\nThree of a Kind    x2\nTwo Pair           x1\nOne Pair           x0",
-  dealButton = "Deal",
-  playAgainButton = "Play Again",
-  okButton = "OK",
-  tradeAllButton = "Trade All",
-  highButton = "High",
-  lowButton = "Low",
-  yesButton = "YES",
-  noButton = "NO",
-  musicButton = "♪",
-  welcome = "welcome",
-  start = "start",
-  discard = "discard",
-  doubling = "doubling",
-  eval = "eval",
-  end = "end",
-  highlow = "highlow",
-  hlwin = "hlwin",
-  hllose = "hllose",
-  hlmax = "hlmax",
-  gameover = "gameover";
+    bInvalidBet,
+    chips,
+    cardsAnim,
+    state,
+    mult,
+    highOrLow,
+    doubleCount,
+    nextCard,
+    startBgm,
+    muteBgm,
+    savedChips,
+    result,
+    pastBet,
+    amnt,
+    btnColor,
+    cursorColor;
+
+// Colors
+var darkBlue,
+    hoverBlue,
+    darkRed,
+    hoverRed,
+    shadow,
+    black,
+    white,
+    golden;
+
+// Message Texts
+const betMessage = "Use Arrows to\n Customize  Bet",
+      invalidBetMessage = "Bet amount must be less\n than or equal to Chips!",
+      discardMessage = "Select cards you wish to trade",
+      dealMessage = "Click 'Deal' to Play",
+      doubleMessage = "Play Higher/Lower to multiply winnings?",
+      continuePlayingMessage = "Go again?",
+      highLowMessage = "Will the next card be higher or lower?",
+      hlwinMessage = "Alright! Winnings Doubled!",
+      hlloseMessage = "Sorry! You lost everything!",
+      hlmaxMessage = "Maximum Doubling Reached!\nReturning to start...",
+      playAgainMessage = "Press 'enter' to play again",
+      gameoverMessage = "You ran out of chips!\nGAMEOVER",
+      streakMessage = "x Streak!",
+      pokerHands1 = "Royal Flush       x100\nFive of a Kind    x50\nStraight Flush    x20\nFour of a Kind    x10\nFull House        x5",
+      pokerHands2 = "Flush              x4\nStraight           x3\nThree of a Kind    x2\nTwo Pair           x1\nOne Pair           x0",
+      betCursor = "⌃";
+
+// Button Texts
+const left = "⬅",
+      right = "➡",
+      up = "⬆",
+      down = "⬇",
+      dealButton = "Deal",
+      playAgainButton = "Play Again",
+      okButton = "OK",
+      tradeAllButton = "Trade All",
+      highButton = "High",
+      lowButton = "Low",
+      yesButton = "YES",
+      noButton = "NO",
+      musicButton = "♪";
+
+// Gamestates
+const welcome = "welcome",
+      start = "start",
+      discard = "discard",
+      doubling = "doubling",
+      eval = "eval",
+      end = "end",
+      highlow = "highlow",
+      hlwin = "hlwin",
+      hllose = "hllose",
+      hlmax = "hlmax",
+      gameover = "gameover";
+
+// Number constants
 const CARDSY = 480,
-  WIDTH = 1280,
-  HEIGHT = 720,
-  CENTER_X = 640,
-  CENTER_Y = 360,
-  STARTING_CHIPS = 100,
-  DOUBLE_LIMIT = 10;
+      WIDTH = 1280,
+      HEIGHT = 720,
+      CENTER_X = 640,
+      CENTER_Y = 360,
+      STARTING_CHIPS = 100,
+      DOUBLE_LIMIT = 10;
 
 //=============================================================
 // Pre load media files
@@ -87,6 +116,7 @@ function setup() {
     chips = STARTING_CHIPS;
   betAmount = 1;
   bInvalidBet = false;
+  cursorPos = 0;
   
   // Set initial state for some vars
   nextCard = null;
@@ -95,6 +125,17 @@ function setup() {
   muteBgm = false;
   result = "";
   pastBet = -1;
+  cursorColor = 0;
+  
+  // Initialize common colors
+  darkBlue  = color(60, 30, 220);
+  hoverBlue = color(80, 50, 240);
+  darkRed   = color(180, 0, 60);
+  hoverRed  = color(200, 20, 80);
+  shadow    = color(0, 150);
+  black     = color(0);
+  white     = color(255);
+  golden    = color(255, 206, 36);
 }
 
 //=============================================================
@@ -112,6 +153,7 @@ function draw() {
   if (![start, highlow, hlwin, hllose, hlmax].includes(state))
     for (let i = 0; i < cardsInPlay.length; i++)
       cardsInPlay[i].draw();
+  
   // These are the cards for doubling
   if (cardsForDoubling.length > 0) {
     let length = cardsForDoubling.length;
@@ -131,40 +173,46 @@ function draw() {
       else if (length == 1)
         cardsForDoubling[i].drawxy(CENTER_X, CARDSY - 40);
     }
-    /*
-    if (nextCard){
-      nextCard.drawxy(CENTER_X + 100, CARDSY - 40);
-    }
-    */
   }
 
   // Poker hand multiplier background
   rectMode(CENTER);
-  drawBox(432, 102, 720, 160, color(0, 0, 0, 100), color(100, 50, 10));
+  push();
+    strokeWeight(0);
+    drawPane(432, 102, 720, 170, color(120, 50, 10, 220), color(0, 0, 0, 80), 5);
+  pop();
 
   // Display pokerhand multipliers
   let currentFont = textFont();
   textFont('Consolas');
   textSize(24);
   textAlign(LEFT, CENTER);
-  drawText(pokerHands1, 90, 102, color(0), color(255, 201, 14));
-  drawText(pokerHands2, 490, 102, color(0), color(255, 201, 14));
+  drawText(pokerHands1, 95, 102, black, golden);
+  drawText(pokerHands2, 490, 102, black, golden);
 
   // Restore the original font
   textFont(currentFont);
 
   // Chips background
-  drawBox(1022, 102, 380, 160, color(0, 0, 0, 100), color(240, 245, 180));
-  rect(1020, 100, 380, 2);
-
+  push();
+    strokeWeight(0);
+    drawPane(1022, 102, 380, 170, color(230, 245, 160, 200), color(146, 149, 109), 5);
+    fill(184, 222, 136);
+    rect(1022, 100, 370, 4);
+  pop();
+  
   // Display chip amounts
   textSize(32);
-  drawText("Chips", 850, 63, color(0, 0, 0, 70), color(0));
-  drawText("Bet", 850, 143, color(0, 0, 0, 70), color(0));
+  drawText("Chips", 850, 63, color(0, 0, 0, 70), color(250));
+  drawText("Bet", 850, 143, color(0, 0, 0, 70), color(250));
   textAlign(RIGHT, CENTER);
-  drawText(chips, 1190, 63, color(0, 0, 0, 70), color(0));
-  drawText(betAmount, 1190, 143, color(0, 0, 0, 70), color(0));
-
+  drawTextUniformR(chips, 1190, 63, 32, color(0, 0, 0, 70), color(250));
+  drawTextUniformR(betAmount, 1190, 143, 32, color(0, 0, 0, 70), color(250));
+  // Bet cursor
+  textSize(30);
+  cursorColor -= 2;
+  if (cursorColor < 180) cursorColor = 250;
+  drawText(betCursor, 1190 - 18 * cursorPos, 172, color(cursorColor,70), color(cursorColor));
 
   // Draw buttons
   rectMode(CENTER);
@@ -172,57 +220,109 @@ function draw() {
   textAlign(CENTER, CENTER);
   switch (state) {
     case start:
-      drawButton(CENTER_X, CENTER_Y + 148, 120, 50, color(0, 0, 0, 150), color(100, 80, 250));
+      // Deal button
+      if (insideBox(CENTER_X, CENTER_Y + 148, 120, 50)) btnColor = hoverBlue;
+      else btnColor = darkBlue;
+      drawButton(CENTER_X, CENTER_Y + 148, 120, 50, shadow, btnColor);
+      
       textSize(36);
-      drawText(dealButton, CENTER_X, CENTER_Y + 150, color(0), color(255));
+      drawText(dealButton, CENTER_X, CENTER_Y + 150, black, white);
       break;
     case discard:
-      drawButton(730, 648, 80, 50, color(0, 0, 0, 150), color(70, 50, 250));
-      drawButton(580, 648, 180, 50, color(0, 0, 0, 150), color(200, 0, 100));
+      // Ok button
+      if (insideBox(730, 648, 80, 50)) btnColor = hoverBlue;
+      else btnColor = darkBlue;
+      drawButton(730, 648, 80, 50, shadow, btnColor);
+      
+      // Trade All button
+      if (insideBox(580, 648, 180, 50)) btnColor = hoverRed;
+      else btnColor = darkRed;
+      drawButton(580, 648, 180, 50, shadow, btnColor);
+      
       textSize(36);
-      drawText(okButton, 730, 650, color(0), color(255));
-      drawText(tradeAllButton, 580, 650, color(0), color(255));
+      drawText(okButton, 730, 650, black, white);
+      drawText(tradeAllButton, 580, 650, black, white);
       break;
     case end:
-      drawButton(640, 648, 80, 50, color(0, 0, 0, 150), color(70, 50, 250));
+      // Ok button
+      if (insideBox(640, 648, 80, 50)) btnColor = hoverBlue;
+      else btnColor = darkBlue;
+      drawButton(640, 648, 80, 50, shadow, btnColor);
+      
       textSize(36);
-      drawText(okButton, 640, 650, color(0), color(255));
+      drawText(okButton, 640, 650, black, white);
       break;
     case doubling:
-      drawButton(570, 648, 100, 50, color(0, 0, 0, 150), color(70, 50, 250));
-      drawButton(690, 648, 80, 50, color(0, 0, 0, 150), color(200, 0, 100));
+      // Yes button
+      if (insideBox(570, 648, 100, 50)) btnColor = hoverBlue;
+      else btnColor = darkBlue;
+      drawButton(570, 648, 100, 50, shadow, btnColor);
+      
+      // No button
+      if (insideBox(690, 648, 80, 50)) btnColor = hoverRed;
+      else btnColor = darkRed;
+      drawButton(690, 648, 80, 50, shadow, btnColor);
+      
       textSize(36);
-      drawText(yesButton, 570, 650, color(0), color(255));
-      drawText(noButton, 690, 650, color(0), color(255));
+      drawText(yesButton, 570, 650, black, white);
+      drawText(noButton, 690, 650, black, white);
       break;
     case highlow:
-      drawButton(570, 648, 110, 50, color(0, 0, 0, 150), color(70, 50, 250));
-      drawButton(710, 648, 100, 50, color(0, 0, 0, 150), color(200, 0, 100));
+      // High button
+      if (insideBox(570, 648, 110, 50)) btnColor = hoverBlue;
+      else btnColor = darkBlue;
+      drawButton(570, 648, 110, 50, shadow, btnColor);
+      
+      // Low button
+      if (insideBox(710, 648, 100, 50)) btnColor = hoverRed;
+      else btnColor = darkRed;
+      drawButton(710, 648, 100, 50, shadow, btnColor);
+      
       textSize(36);
-      drawText(highButton, 570, 650, color(0), color(255));
-      drawText(lowButton, 710, 650, color(0), color(255));
+      drawText(highButton, 570, 650, black, white);
+      drawText(lowButton, 710, 650, black, white);
       break;
     case hlwin:
-      drawButton(570, 648, 100, 50, color(0, 0, 0, 150), color(70, 50, 250));
-      drawButton(690, 648, 80, 50, color(0, 0, 0, 150), color(200, 0, 100));
+      // Yes button
+      if (insideBox(570, 648, 100, 50)) btnColor = hoverBlue;
+      else btnColor = darkBlue;
+      drawButton(570, 648, 100, 50, shadow, btnColor);
+      
+      // No button
+      if (insideBox(690, 648, 80, 50)) btnColor = hoverRed;
+      else btnColor = darkRed;
+      drawButton(690, 648, 80, 50, shadow, btnColor);
+      
       textSize(36);
-      drawText(yesButton, 570, 650, color(0), color(255));
-      drawText(noButton, 690, 650, color(0), color(255));
+      drawText(yesButton, 570, 650, black, white);
+      drawText(noButton, 690, 650, black, white);
       break;
     case hllose:
-      drawButton(640, 648, 80, 50, color(0, 0, 0, 150), color(70, 50, 250));
+      // Ok button
+      if (insideBox(640, 648, 80, 50)) btnColor = hoverBlue;
+      else btnColor = darkBlue;
+      drawButton(640, 648, 80, 50, shadow, btnColor);
+      
       textSize(36);
-      drawText(okButton, 640, 650, color(0), color(255));
+      drawText(okButton, 640, 650, black, white);
       break;
     case hlmax:
-      drawButton(640, 648, 80, 50, color(0, 0, 0, 150), color(70, 50, 250));
+      // Ok button
+      if (insideBox(640, 648, 80, 50)) btnColor = hoverBlue;
+      else btnColor = darkBlue;
+      drawButton(640, 648, 80, 50, shadow, btnColor);
+      
       textSize(36);
-      drawText(okButton, 640, 650, color(0), color(255));
+      drawText(okButton, 640, 650, black, white);
       break;
     case gameover:
-      drawButton(640, 648, 80, 50, color(0, 0, 0, 150), color(70, 50, 250));
+      // Ok button
+      if (insideBox(640, 648, 80, 50)) btnColor = hoverBlue;
+      else btnColor = darkBlue;
+      drawButton(640, 648, 80, 50, shadow, btnColor);
+      
       textSize(36);
-      drawText(okButton, 640, 650, color(0), color(255));
+      drawText(okButton, 640, 650, black, white);
       break;
   }
   strokeWeight(1);
@@ -231,88 +331,104 @@ function draw() {
   if (state == start) {
     textSize(40);
     textAlign(CENTER, CENTER);
-    drawBox(CENTER_X, CENTER_Y - 70, 350, 170, color(0), color(25, 100, 200));
-    drawText(betMessage, CENTER_X, CENTER_Y - 70, color(0), color(255));
-    drawText(dealMessage, CENTER_X, CENTER_Y + 80, color(0), color(255, 201, 14));
+    push();
+      strokeWeight(0);
+      drawPane(CENTER_X, CENTER_Y - 70, 330, 140, color(35, 120, 250), color(0, 100, 0, 80), 10);
+    pop();
+    drawText(betMessage, CENTER_X, CENTER_Y - 65, black, white);
+    drawText(dealMessage, CENTER_X, CENTER_Y + 80, black, golden);
     if (bInvalidBet) {
       textSize(36);
       drawText(invalidBetMessage, 1040, 250, color(50, 150), color(255, 50, 10));
     }
-    strokeWeight(0);
-    fill(255, 255, 255, 50);
-    rect(CENTER_X-112, CENTER_Y - 74, 36, 36); // Up
-    rect(CENTER_X-18, CENTER_Y - 74, 36, 36); // Down
-    rect(CENTER_X-112, CENTER_Y - 24, 36, 36); // Left
-    rect(CENTER_X-18, CENTER_Y - 24, 36, 36); // Right
-    strokeWeight(1);
+    
+    // Draw Arrows for bet adjustment
+    textSize(80);
+    let arrows = [left, right, up, down];
+    for (let i = 0; i < arrows.length; i++) {
+      let x = CENTER_X + 245 + 95 * i;
+      let y = CENTER_Y - 70;
+      let color1 = color(20, 140, 50, 180);
+      let color2;
+      if (insideCircle(x, y, 90)) color2 = color(252, 245, 231, 255);
+      else color2 = color(247, 240, 226, 180);
+      drawCircleButton(x, y, 90, 80, color1, color2, arrows[i], 80, 5);
+    }
+    
   } 
   else if (state == discard) {
     textSize(40);
     textAlign(CENTER, CENTER);
-    drawText(discardMessage, CENTER_X, 250, color(0), color(255, 201, 14));
+    drawText(discardMessage, CENTER_X, 250, black, golden);
   } 
   else if (state == end) {
     // Display poker hand
     textSize(56);
     textAlign(CENTER, CENTER);
-    drawText(result, CENTER_X, 280, color(0), color(255, 201, 14));
-    // Show play again text
-    //textSize(24);
-    //fill(0, 0, 0);
-    //text(playAgainMessage, CENTER_X, 300);
-    //fill(255, 201, 14);
-    //text(playAgainMessage, CENTER_X - 2, 298);
+    drawText(result, CENTER_X, 280, black, golden);
   }
   else if (state == doubling) {
+    // Ask player if they want to play bonus game
     textSize(40);
     textAlign(CENTER, CENTER);
-    drawText(doubleMessage, CENTER_X, 250, color(0), color(255, 201, 14));
+    drawText(doubleMessage, CENTER_X, 250, black, golden);
   }
   else if (state == highlow) {
+    // Will the next card be High or Low
     textSize(40);
     textAlign(CENTER, CENTER);
-    drawText(highLowMessage, CENTER_X, 250, color(0), color(255, 201, 14));
+    drawText(highLowMessage, CENTER_X, 250, black, golden);
     if (doubleCount > 1)
-      drawText(doubleCount+streakMessage, CENTER_X + 300, CARDSY-40, color(0), color(255, 201, 14)); 
+      drawText(doubleCount+streakMessage, CENTER_X + 300, CARDSY-40, black, golden);
   }
   else if (state == hlwin) {
+    // Guessed Correct! Go again?
     textSize(40);
     textAlign(CENTER, CENTER);
-    drawText(hlwinMessage, CENTER_X, 250, color(0), color(255, 201, 14)); 
-    drawText(continuePlayingMessage, CENTER_X, 300, color(0), color(255, 201, 14));
+    drawText(hlwinMessage, CENTER_X, 250, black, golden);
+    drawText(continuePlayingMessage, CENTER_X, 300, black, golden);
     if (doubleCount > 1)
-      drawText(doubleCount+streakMessage, CENTER_X + 300, CARDSY-40, color(0), color(255, 201, 14)); 
+      drawText(doubleCount+streakMessage, CENTER_X + 300, CARDSY-40, black, golden); 
   }
   else if (state == hllose) {
+    // Guessed Wrong 
     textSize(40);
     textAlign(CENTER, CENTER);
-    drawText(hlloseMessage, CENTER_X, 250, color(0), color(255, 201, 14));
+    drawText(hlloseMessage, CENTER_X, 250, black, golden);
   }
   else if (state == hlmax) {
+    // Maximum Guesses Reached
     textSize(40);
     textAlign(CENTER, CENTER);
-    drawText(hlmaxMessage, CENTER_X, 250, color(0), color(255, 201, 14));
+    drawText(hlmaxMessage, CENTER_X, 250, black, golden);
   }
   else if (state == gameover) {
+    // No more chips
     textSize(40);
     textAlign(CENTER, CENTER);
-    drawText(gameoverMessage, CENTER_X, 250, color(0), color(255, 201, 14));
+    drawText(gameoverMessage, CENTER_X, 250, black, golden);
   }
   
   // Mute/Unmute button for BGM
   strokeWeight(0);
   if (muteBgm) {
     let color1 = color(20, 140, 50, 50);
-    let color2 = color(247, 240, 196, 150);
-    drawCircleButton(1250, 690, 40, 35, color1, color2, '♪', 30);
+    let color2;
+    // Hover color
+    if (insideCircle(1250, 690, 40)) color2 = color(252, 245, 201, 200)
+    else color2 = color(247, 240, 196, 150);
+    drawCircleButton(1250, 690, 40, 35, color1, color2, '♪', 30, 1);
     fill(color(255, 0, 0, 200));
     textSize(49);
     text('⊘', 1250, 690);
   }
   else {
     let color1 = color(20, 140, 50, 200);
-    let color2 = color(247, 240, 196, 250);
-    drawCircleButton(1250, 690, 40, 35, color1, color2, '♪', 30);
+    let color2;
+    // Hover color
+    if (insideCircle(1250, 690, 40)) color2 = color(252, 245, 201, 200)
+    else color2 = color(247, 240, 196, 150);    
+    drawCircleButton(1250, 690, 40, 35, color1, color2, '♪', 30, 1);
   }
   
 }
@@ -400,10 +516,6 @@ function checkHand(cardArray) {
   var isRoyal = false;
   var numOfJokers = 0;
 
-  // Initialize count array to all zeroes
-  //for (let i = 0; i < count.length; i++)
-  //  count[i] = 0;
-
   // Copy array to new variable
   arrayCopy(cardArray, hand, 5);
 
@@ -429,7 +541,7 @@ function checkHand(cardArray) {
       count[13]++;
     } else
       count[hand[i].value - 1]++;
-    print(hand[i].toString());
+    //print(hand[i].toString());
   }
 
   // Loop through and determine card counts
@@ -482,7 +594,7 @@ function checkHand(cardArray) {
     }
   }
   
-  print("\0");
+  //print("\0");
 
   // Five of a Kind
   if (fourOfAKind && numOfJokers == 1 || threeOfAKind && numOfJokers == 2) {
@@ -554,6 +666,11 @@ function reset() {
   // Subtract bet from chips
   chips -= betAmount;
   
+  // Move cursor if it is outside range
+  let mcp = maxCurPos();
+  if (cursorPos > mcp)
+    cursorPos = mcp;
+  
   // Populate the card list
   for (let i = 0; i < 5; i++) {
     while (true) {
@@ -595,35 +712,19 @@ function keyPressed() {
   }
   switch (state) {
     case start:
+      amnt = 10 ** cursorPos;
       switch (keyCode) {
         case ENTER:
           if (betAmount <= chips) 
             deal();
           break;
-        case LEFT_ARROW:
-          if (betAmount > 10) {
-            betAmount -= 10;
-            sound.play("ding");
-          }
-          else {
-            if (betAmount != 1)
-              sound.play("ding");
-            betAmount = 1;
-          }
+        case LEFT_ARROW: curLeft();
           break;
-        case RIGHT_ARROW:
-          betAmount += 10;
-          sound.play("ding");
+        case RIGHT_ARROW: curRight();
           break;
-        case UP_ARROW:
-          betAmount++;
-          sound.play("ding");
+        case UP_ARROW: curUp();
           break;
-        case DOWN_ARROW:
-          if (betAmount > 1) {
-            betAmount--;
-            sound.play("ding");
-          }
+        case DOWN_ARROW: curDown();
           break;
       }
       break;
@@ -656,7 +757,7 @@ function keyPressed() {
       if (keyCode == ENTER) {
         state = doubling;
         sound.play("card");
-      }
+      } 
       break;
     case doubling:
       if (keyCode == ENTER) {
@@ -678,7 +779,8 @@ function keyPressed() {
       if (keyCode == ENTER) {
         state = highlow;
         sound.play("card");
-      }
+      } else if (keyCode == BACKSPACE)
+        backToStart();
       break;
     case hllose:
       if (keyCode == ENTER)
@@ -689,12 +791,8 @@ function keyPressed() {
         backToStart();
       break;
     case gameover:
-      if (keyCode == ENTER) {
-        chips = STARTING_CHIPS;
-        cardsInPlay = [];
-        state = start;
-        sound.play("card");
-      }
+      if (keyCode == ENTER) 
+        endgame();
       break;
   }
   return false;
@@ -708,78 +806,47 @@ function mouseClicked() {
 // Register clicks based on mouse position and state
 function buttonClick() {
   // Mute/Unmute BGM
-  if (mouseX <= 1250 + 25 && mouseX >= 1250 - 25)
-    if (mouseY <= 690 + 25 && mouseY >= 690 - 25) {
-      if (muteBgm) {
-        // Unmute
-        muteBgm = false;
-        sound.loop_bgm();
-      }
-      else {
-        // Mute
-        muteBgm = true;
-        sound.stop_bgm();
-      }
+  if (insideCircle(1250, 690, 50)) {
+    if (muteBgm) {
+      // Unmute
+      muteBgm = false;
+      sound.loop_bgm();
     }
+    else {
+      // Mute
+      muteBgm = true;
+      sound.stop_bgm();
+    }
+  }
   switch (state) {
+    // Before game starts, choose bet amount
     case start:
-      /*
-      rect(CENTER_X-112, CENTER_Y - 74, 36, 36); // Up
-      rect(CENTER_X-18, CENTER_Y - 74, 36, 36); // Down
-      rect(CENTER_X-112, CENTER_Y - 24, 36, 36); // Left
-      rect(CENTER_X-18, CENTER_Y - 24, 36, 36); // Right
-      */
+      // amount to add based on current cursor position
+      amnt = 10 ** cursorPos;
       // Up Arrow
-      if (mouseX <= 528 + 18 && mouseX >= 528 - 18)
-        if (mouseY <= 286 + 18 && mouseY >= 286 - 18) {
-          betAmount++;
-          sound.play("ding");
-        }
+      if (insideCircle(CENTER_X + 435, CENTER_Y - 70, 90))
+        curUp();
       // Down Arrow
-      if (mouseX <= 622 + 18 && mouseX >= 622 - 18)
-        if (mouseY <= 286 + 18 && mouseY >= 286 - 18) {
-          if (betAmount > 1) {
-            betAmount--;
-            sound.play("ding");
-          }
-          else betAmount = 1;
-        }
+      if (insideCircle(CENTER_X + 530, CENTER_Y - 70, 90))
+        curDown();
       // Left Arrow
-      if (mouseX <= 528 + 18 && mouseX >= 528 - 18)
-        if (mouseY <= 336 + 18 && mouseY >= 336 - 18) {
-          if (betAmount > 10) {
-            betAmount -= 10;
-            sound.play("ding");
-          }
-          else {
-            if (betAmount > 1)
-              sound.play("ding");
-            betAmount = 1;
-          }
-        }
+      if (insideCircle(CENTER_X + 245, CENTER_Y - 70, 90))
+        curLeft();
       // Right Arrow
-      if (mouseX <= 622 + 18 && mouseX >= 622 - 18)
-        if (mouseY <= 336 + 18 && mouseY >= 336 - 18) {
-          betAmount+=10;
-          sound.play("ding");
-        }
+      if (insideCircle(CENTER_X + 340, CENTER_Y - 70, 90))
+        curRight();
       // Deal Button
-      if (mouseX <= 640 + 120 / 2 && mouseX >= 640 - 120 / 2)
-        if (mouseY <= 508 + 50 / 2 && mouseY >= 508 - 50 / 2) {
-          deal();
-        }
+      if (insideBox(640, 508, 120, 50))
+        deal();
       break;
+    // Player choosing which card to trade
     case discard:
       // Trade all button
-      if (mouseX <= 580 + 180 / 2 && mouseX >= 580 - 180 / 2)
-        if (mouseY <= 650 + 50 / 2 && mouseY >= 650 - 50 / 2) {
-          tradeAll();
-        }
+      if (insideBox(580, 650, 180, 50))
+        tradeAll();
       // Ok button
-      if (mouseX <= 730 + 80 / 2 && mouseX >= 730 - 80 / 2)
-        if (mouseY <= 650 + 50 / 2 && mouseY >= 650 - 50 / 2) {
-          tradeCards();
-        }
+      if (insideBox(730, 650, 80, 50))
+        tradeCards();
       // Clicking cards to trade
       for (let i = 0; i < cardsInPlay.length; i++) {
         if (cardsInPlay[i].inside(mouseX, mouseY)) {
@@ -794,77 +861,66 @@ function buttonClick() {
         }
       }
       break;
+    // Round over, hand result screen
     case end:
       // Ok button
-      if (mouseX <= 640 + 80 / 2 && mouseX >= 640 - 80 / 2)
-        if (mouseY <= 650 + 50 / 2 && mouseY >= 650 - 50 / 2) {
-          state = doubling;
-          sound.play("card");
-        }
+      if (insideBox(640, 650, 80, 50)) {
+        state = doubling;
+        sound.play("card");
+      }
       break;
+    // Ask to play bonus game for double points
     case doubling:
       // Yes button
-      if (mouseX <= 570 + 80 / 2 && mouseX >= 570 - 80 / 2)
-        if (mouseY <= 650 + 50 / 2 && mouseY >= 650 - 50 / 2) {
-          state = highlow;
-          beginDouble();
-        }
+      if (insideBox(570, 650, 80, 50)) {
+        state = highlow;
+        beginDouble();
+      }
       // No button
-      if (mouseX <= 690 + 80 / 2 && mouseX >= 690 - 80 / 2)
-        if (mouseY <= 650 + 50 / 2 && mouseY >= 650 - 50 / 2) {
-          backToStart();
-        }
+      if (insideBox(690, 650, 80, 50))
+        backToStart();
       break;
+    // Show current card, guess next one
     case highlow:
       // High button
-      if (mouseX <= 570 + 110 / 2 && mouseX >= 570 - 110 / 2)
-        if (mouseY <= 650 + 50 / 2 && mouseY >= 650 - 50 / 2) {
+      if (insideBox(570, 650, 110, 50)) {
           highOrLow = highButton;
           highLowCard();
-        }
+      }
       // Low button
-      if (mouseX <= 710 + 100 / 2 && mouseX >= 710 - 100 / 2)
-        if (mouseY <= 650 + 50 / 2 && mouseY >= 650 - 50 / 2) {
+      if (insideBox(710, 650, 100, 50)) {
           highOrLow = lowButton;
           highLowCard();
-        }
+      }
       break;
+    // Guessed correctly on High or Low card
     case hlwin: 
       // Yes button
-      if (mouseX <= 570 + 80 / 2 && mouseX >= 570 - 80 / 2)
-        if (mouseY <= 650 + 50 / 2 && mouseY >= 650 - 50 / 2) {
-          state = highlow;
-          sound.play("card");
-        }
+      if (insideBox(570, 650, 80, 50)) {
+        state = highlow;
+        sound.play("card");
+      }
       // No button
-      if (mouseX <= 690 + 80 / 2 && mouseX >= 690 - 80 / 2)
-        if (mouseY <= 650 + 50 / 2 && mouseY >= 650 - 50 / 2) {
-          backToStart();
-        }
+      if (insideBox(690, 650, 80, 50))
+        backToStart();
       break;
+    // Guessed wrong, round over
     case hllose: 
       // Ok button
-      if (mouseX <= 640 + 80 / 2 && mouseX >= 640 - 80 / 2)
-        if (mouseY <= 650 + 50 / 2 && mouseY >= 650 - 50 / 2) {
-          backToStart();
-        }
+      if (insideBox(640, 650, 80, 50))
+        backToStart();
       break;
+    // Reached maximum number of doubling attempts
     case hlmax: 
       // Ok button
-      if (mouseX <= 640 + 80 / 2 && mouseX >= 640 - 80 / 2)
-        if (mouseY <= 650 + 50 / 2 && mouseY >= 650 - 50 / 2) {
-          backToStart();
-        }
+      if (insideBox(640, 650, 80, 50)) 
+        backToStart();
       break;
+    // Chips hit zero, player lost
     case gameover: 
       // Ok button
-      if (mouseX <= 640 + 80 / 2 && mouseX >= 640 - 80 / 2)
-        if (mouseY <= 650 + 50 / 2 && mouseY >= 650 - 50 / 2) {
-          chips = STARTING_CHIPS;
-          cardsInPlay = [];
-          state = start;
-          sound.play("card");
-        }
+      if (insideBox(640, 650, 80, 50))
+        endgame();
       break;
   }
 }
@@ -1019,13 +1075,77 @@ function highLowCard() {
   
 }
 
+
+//=============================================================
+// Gameover when chips hit 0
+function endgame() {
+  chips = STARTING_CHIPS;
+  betAmount = 1;
+  cursorPos = 0;
+  cardsInPlay = [];
+  state = start;
+  sound.play("card");
+}
+
+
+//=============================================================
+// Functions relating to bet cursor
+function maxCurPos() {
+  var i = 1;
+  while (chips / (10 ** i) >= 1) {
+    i += 1;
+  }
+  return i - 1;
+}
+
+function curLeft() {
+  if (cursorPos < maxCurPos()) {
+    cursorPos++;
+    sound.play("ding");
+  }
+}
+
+function curRight() {
+  if (cursorPos > 0) {
+    cursorPos--;
+    sound.play("ding");
+  }
+}
+
+function curUp() {
+  if (betAmount + amnt < chips) {
+    betAmount += amnt;
+    sound.play("ding");
+  } else if (betAmount != chips) {
+    betAmount = chips;
+    sound.play("ding");
+  }
+}
+
+function curDown() {
+  if (betAmount - amnt > 1) {
+    betAmount -= amnt;
+    sound.play("ding");
+  } else if (betAmount != 1) {
+    betAmount = 1;
+    sound.play("ding");
+  }
+}
+
 //=============================================================
 // Functions to facilitate drawing boxes and text
-function drawBox(x, y, w, h, color1, color2) {
+function drawBox(x, y, w, h, color1, color2, r=0) {
   fill(color1);
-  rect(x, y, w, h);
+  rect(x, y, w, h, r, r, r, r);
   fill(color2);
-  rect(x - 2, y - 2, w, h);
+  rect(x - 2, y - 2, w, h, r, r, r, r);
+}
+
+function drawPane(x, y, w, h, color1, color2, r=0) {
+  fill(color1);
+  rect(x, y, w, h, r, r, r, r);
+  fill(color2);
+  rect(x, y, w - 10, h - 10, r, r, r, r);
 }
 
 function drawButton(x, y, w, h, color1, color2) {
@@ -1042,7 +1162,21 @@ function drawText(str, x, y, color1, color2) {
   text(str, x - 2, y - 2);
 }
 
-function drawCircleButton(x, y, r1, r2, color1, color2, str="", strSize=0) {
+// Draw text with uniform spacing right aligned
+function drawTextUniformR(str, x, y, size, color1, color2) {
+  str = String(str);
+  len = str.length;
+  for(let i = len - 1; i >= 0; i--) {
+    let c = str.charAt(len - i - 1);
+    let spacing = size / 2 + 2;
+    fill(color1);
+    text(c, x - i * spacing, y);
+    fill(color2);
+    text(c, x - i * spacing - 2, y - 2);
+  }
+}
+
+function drawCircleButton(x, y, r1, r2, color1, color2, str="", strSize=0, offset=0) {
   strokeWeight(0);
   
   // Circle
@@ -1055,5 +1189,25 @@ function drawCircleButton(x, y, r1, r2, color1, color2, str="", strSize=0) {
   textAlign(CENTER, CENTER);
   fill(color2);
   textSize(strSize);
-  text(str, x, y);
+  text(str, x, y + offset);
+}
+
+
+//=============================================================
+// Checking mouse bounds
+function insideCircle(x, y, r) {
+  var result = false;
+  let relDis = dist(x, y, mouseX, mouseY);
+  if (relDis < r / 2.0 + 1)
+    result = true;
+  return result;  
+}
+
+// Assumes boxes are center aligned
+function insideBox(x, y, w, h) {
+  var result = false;
+  if (mouseX > x - w / 2 && mouseX < x + w / 2 &&
+      mouseY > y - h / 2 && mouseY < y + h / 2)
+    result = true;
+  return result;
 }
